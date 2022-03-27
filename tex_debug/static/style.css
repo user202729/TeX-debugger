@@ -1,0 +1,100 @@
+body{
+	background-color: black;
+	color: white;
+}
+
+/* https://stackoverflow.com/questions/7011602/stretching-iframe-in-html5 */
+#wrap_all { position:fixed; left:0; width:100%; top:0; height:100%; }
+
+
+#wrap_all{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+#status{
+	flex: 0 0 1.3em;
+}
+
+#display_wrap{
+	flex: 1 0 auto;
+}
+#controller{
+	flex: 0 0 50px;
+}
+
+.control-button{
+}
+
+
+
+.tokenlist, .fileline{
+	border: 1px solid gray;
+	height: 2em;
+	overflow: scroll;
+	white-space: nowrap;
+}
+.fileline{
+	background-color: #404040;
+}
+
+.explicit_char_target{
+	background-color: #FF8080;
+}
+.explicit_char{
+	background-color: #606060;
+}
+
+
+.cs, .active_char{
+	color: #FFFF00;
+}
+.cs::before{
+	content: "\\";
+}
+.cs::after{
+	content: " ";
+}
+
+#popup{
+	display: none;
+	position: absolute;
+	border: 1px solid gray;
+	background-color: #000080ff;
+}
+
+.cmd__left_brace_cmd, .cmd__right_brace_cmd, .cmd__mac_param_cmd{
+	color: #FFAAAA;
+}
+.cmd__out_param_cmd{
+	border: 1px solid #FFAAAA;
+}
+.out_param_expansion{
+	border: 1px solid #FFAAAA;
+	background-color: #000080;
+}
+.cmd__out_param_cmd::before{
+	content: "#";
+}
+
+.cmd__letter_cmd{
+	color: #AAFFAA;
+}
+
+.cmd__spacer_cmd{
+	color: #808080;
+}
+
+
+input[type=button]{
+	color: white;
+	background-color: #0000ff;
+	border: 0;
+}
+
+#log{
+	display: flex;
+	flex-direction: column-reverse;
+	flex: 0 0 30%;
+	overflow: scroll;
+}

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta xhttp-equiv="refresh" content=1>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <input type=text id=filename value=""></input>
+  <div id=output></div>
+  <script>
+"use strict"
+
+{
+  if(localStorage.logfilename)
+    filename.value=localStorage.logfilename
+  else
+    filename.value="<URL to log file>"
+
+
+  function show_html(s){
+    return s.replace(/ /g, "␣")
+      .replace(/\r|\n/g, "↵")
+      .replace(/\t/g, "⇥")
+  }
+
+  let last_text=""
+  async function run(){
+    localStorage.logfilename=filename.value
+
+    const text=await(
+      await fetch(filename.value,
+        {cache: "reload"} // workaround for some broken server implementation (?)
+      )
+    ).text()
+    if(text===last_text) return
+    last_text=text
+
+    output.innerHTML=""
+    const matchmark=/prettymark\n/g
+    const matchstr=/(.*?)-\n/gs  // does not match the \n
+    const matchline=/(.*)\n/g
+    let index=0
+    output.innerHTML=""
+
+    function extract_by(r){
+      r.lastIndex=index
+      const result=r.exec(text)
+      index=r.lastIndex
+      return result
+    }
+
+    function readstr(){
+      const line=extract_by(matchstr)[1]
+      return String.fromCodePoint(...line
+        .replace(/\n/g, "")
+        .replace(/,$/, "")
+        .split(","))
+    }
+
+    while(extract_by(matchmark)){
+      // process this log line
+      const tl_div=document.createElement("div")
+      tl_div.className="tokenlist"
+      while(true){
+        const line=extract_by(matchline)[1]
+        
+        if(line==="-") break
+        // add this token
+        const charcode=parseInt(line.slice(0, -1))
+        if(isNaN(charcode)) {
+          throw new Error("Cannot get charcode from line: "+line)
+        }
+        const catcode=line.slice(-1)
+        const token_span=document.createElement("span")
+        tl_div.appendChild(token_span)
+        if(charcode===-1){
+          // is control sequence
+
+          const control_sequence_name=readstr()
+          const meaning_str=readstr()
+
+          console.log("AA", control_sequence_name, meaning_str)
+
+          token_span.innerText=show_html(control_sequence_name)
+          token_span.title=`cs '${control_sequence_name}' → ${meaning_str}`
+          token_span.className="cs"
+        }else{
+          // is character token
+          const ch=String.fromCodePoint(charcode)
+          token_span.innerText=show_html(ch)
+          if(catcode==='D'){
+            token_span.className="active_char"
+            token_span.title=`active ${ch} # ${charcode}`
+          }else{
+            const cls={
+              1: 'cmd__left_brace_cmd',
+              2: 'cmd__right_brace_cmd',
+              3: 'cmd__math_shift_cmd',
+              4: 'cmd__tab_mark_cmd',
+              6: 'cmd__mac_param_cmd',
+              7: 'cmd__sup_mark_cmd',
+              8: 'cmd__sub_mark_cmd',
+              A: 'cmd__spacer_cmd',
+              B: 'cmd__letter_cmd',
+              C: 'cmd__other_char_cmd',
+            }[catcode]
+            token_span.className="token "+cls
+            token_span.title=`${cls} ${ch} # ${charcode}`
+          }
+        }
+      }
+      output.appendChild(tl_div)
+    }
+  }
+  run()
+  setInterval(run, 1000)
+}
+  </script>
+
+</body>
+</html>
