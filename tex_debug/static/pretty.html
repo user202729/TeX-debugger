@@ -54,10 +54,14 @@
 
     function readstr(){
       const line=extract_by(matchstr)[1]
-      return String.fromCodePoint(...line
+      const codepoints=line
         .replace(/\n/g, "")
         .replace(/,$/, "")
-        .split(","))
+      if(codepoints){
+        return String.fromCodePoint(...codepoints.split(","))
+      }else{
+        return ""  // have to special case, as split() returns [""]
+      }
     }
 
     while(extract_by(matchmark)){
